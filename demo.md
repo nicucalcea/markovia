@@ -40,6 +40,8 @@ function hello() {
 2. Work the same way
 3. Clean and simple
 
+- [] Something to do 
+
 ###### Try It Out
 
 Open this file in VS Code with Markovia installed and see the magic happen! Press `Ctrl+B` (or `Cmd+B` on Mac) to make text **bold**.

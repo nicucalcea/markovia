@@ -5,6 +5,7 @@ import { TaskAutoSuggestProvider, showDatePicker } from './taskAutoSuggest';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
+let statusBarItem: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Markovia markdown editor is now active');
@@ -31,6 +32,13 @@ export function activate(context: vscode.ExtensionContext) {
 			' ' // Trigger on space after checkbox
 		)
 	);
+
+	// Initialize status bar item for word/character count
+	statusBarItem = vscode.window.createStatusBarItem(
+		vscode.StatusBarAlignment.Right,
+		100 // Priority - higher = more to the right
+	);
+	context.subscriptions.push(statusBarItem);
 
 	// Register all formatting commands
 	context.subscriptions.push(
@@ -61,12 +69,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
 				updateDecorations(editor);
+				updateWordCount(editor);
 			}
 		}),
 		vscode.workspace.onDidChangeTextDocument(event => {
 			const editor = vscode.window.activeTextEditor;
 			if (editor && event.document === editor.document) {
 				updateDecorations(editor);
+				updateWordCount(editor);
 			}
 		}),
 		vscode.workspace.onDidChangeConfiguration(e => {
@@ -86,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
 		updateDecorations(editor);
+		updateWordCount(editor);
 	}
 }
 
@@ -96,6 +107,36 @@ function updateDecorations(editor: vscode.TextEditor) {
 	if (enableWYSIWYG) {
 		decorator.updateDecorations(editor);
 	}
+}
+
+function updateWordCount(editor: vscode.TextEditor | undefined) {
+	if (!editor) {
+		statusBarItem.hide();
+		return;
+	}
+
+	// Only show for markdown files
+	if (editor.document.languageId !== 'markdown') {
+		statusBarItem.hide();
+		return;
+	}
+
+	const text = editor.document.getText();
+	
+	// Character count (including spaces)
+	const charCount = text.length;
+	
+	// Character count (excluding spaces and newlines)
+	const charCountNoSpaces = text.replace(/\s/g, '').length;
+	
+	// Word count (split by whitespace, filter empty strings)
+	const words = text.split(/\s+/).filter(word => word.length > 0);
+	const wordCount = words.length;
+	
+	// Update status bar
+	statusBarItem.text = `$(pencil) ${wordCount} words, ${charCount} chars`;
+	statusBarItem.tooltip = `Words: ${wordCount}\nCharacters: ${charCount}\nCharacters (no spaces): ${charCountNoSpaces}`;
+	statusBarItem.show();
 }
 
 function toggleToolbar() {

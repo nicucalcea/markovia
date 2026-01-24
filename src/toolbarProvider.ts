@@ -33,11 +33,6 @@ export class MarkdownToolbarProvider implements vscode.CodeLensProvider {
 				command: 'markovia.toggleItalic'
 			}),
 			new vscode.CodeLens(topOfDocument, {
-				title: '$(code) Code',
-				tooltip: 'Inline Code (Ctrl+`)',
-				command: 'markovia.toggleCode'
-			}),
-			new vscode.CodeLens(topOfDocument, {
 				title: '$(link) Link',
 				tooltip: 'Insert Link (Ctrl+K)',
 				command: 'markovia.insertLink'
@@ -58,28 +53,38 @@ export class MarkdownToolbarProvider implements vscode.CodeLensProvider {
 				command: 'markovia.toggleBlockquote'
 			}),
 			new vscode.CodeLens(topOfDocument, {
+				title: '$(code) Code',
+				tooltip: 'Inline Code (Ctrl+`)',
+				command: 'markovia.toggleCode'
+			}),
+			new vscode.CodeLens(topOfDocument, {
 				title: '$(file-code) Code Block',
 				tooltip: 'Code Block (Ctrl+Shift+C)',
 				command: 'markovia.insertCodeBlock'
 			}),
 			new vscode.CodeLens(topOfDocument, {
-				title: '$(symbol-file) H1',
+				title: '$(symbol-numeric) H1',
 				tooltip: 'Heading 1 (Ctrl+Shift+1)',
 				command: 'markovia.toggleHeading1'
 			}),
 			new vscode.CodeLens(topOfDocument, {
-				title: '$(symbol-class) H2',
+				title: '$(symbol-numeric) H2',
 				tooltip: 'Heading 2 (Ctrl+Shift+2)',
 				command: 'markovia.toggleHeading2'
 			}),
-			new vscode.CodeLens(topOfDocument, {
-				title: '$(symbol-method) H3',
-				tooltip: 'Heading 3 (Ctrl+Shift+3)',
-				command: 'markovia.toggleHeading3'
-			}),
-		];
+		new vscode.CodeLens(topOfDocument, {
+			title: '$(symbol-numeric) H3',
+			tooltip: 'Heading 3 (Ctrl+Shift+3)',
+			command: 'markovia.toggleHeading3'
+		}),
+		new vscode.CodeLens(topOfDocument, {
+			title: '$(comment) Comment',
+			tooltip: 'HTML Comment (Ctrl+/)',
+			command: 'markovia.toggleComment'
+		}),
+	];
 
-		return toolbarButtons;
+	return toolbarButtons;
 	}
 
 	public refresh(): void {

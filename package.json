@@ -2,7 +2,7 @@
   "name": "markovia",
   "displayName": "Markovia",
   "description": "Simple and lightweight Markdown editor for VS Code with formatting toolbar and keyboard shortcuts.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "nicu-calcea",
   "engines": {
     "vscode": "^1.108.1"

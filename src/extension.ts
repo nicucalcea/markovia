@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
+import { TaskAutoSuggestProvider, showDatePicker } from './taskAutoSuggest';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
@@ -18,6 +19,16 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCodeLensProvider(
 			{ language: 'markdown', scheme: 'file' },
 			toolbarProvider
+		)
+	);
+
+	// Register task auto-suggest completion provider
+	const taskAutoSuggestProvider = new TaskAutoSuggestProvider();
+	context.subscriptions.push(
+		vscode.languages.registerCompletionItemProvider(
+			{ language: 'markdown', scheme: 'file' },
+			taskAutoSuggestProvider,
+			' ' // Trigger on space after checkbox
 		)
 	);
 
@@ -40,7 +51,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('markovia.toggleNumberedList', () => toggleList('1.')),
 		vscode.commands.registerCommand('markovia.toggleBlockquote', toggleBlockquote),
 		vscode.commands.registerCommand('markovia.insertHorizontalRule', insertHorizontalRule),
-		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar)
+		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar),
+		vscode.commands.registerCommand('markovia.showDatePicker', showDatePicker),
+		vscode.commands.registerCommand('markovia.toggleComment', toggleComment)
 	);
 
 	// Update decorations when switching editors or editing
@@ -144,10 +157,21 @@ async function insertLink() {
 	const text = editor.document.getText(selection);
 	const linkText = text || 'link text';
 	
-	const url = await vscode.window.showInputBox({
-		prompt: 'Enter URL',
-		placeHolder: 'https://example.com'
-	});
+	// Check clipboard for a valid URL
+	const clipboardText = await vscode.env.clipboard.readText();
+	const urlRegex = /^https?:\/\/.+/i;
+	let url: string | undefined;
+	
+	if (clipboardText && urlRegex.test(clipboardText.trim())) {
+		// Valid URL found in clipboard, use it directly
+		url = clipboardText.trim();
+	} else {
+		// No valid URL in clipboard, show input box
+		url = await vscode.window.showInputBox({
+			prompt: 'Enter URL',
+			placeHolder: 'https://example.com'
+		});
+	}
 
 	if (url !== undefined) {
 		editor.edit(editBuilder => {
@@ -305,6 +329,59 @@ function insertHorizontalRule() {
 	editor.edit(editBuilder => {
 		editBuilder.insert(position, '\n---\n');
 	});
+}
+
+function toggleComment() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return;
+	}
+
+	const selection = editor.selection;
+	const text = editor.document.getText(selection);
+	
+	// Check if selection spans multiple lines
+	const isMultiLine = selection.start.line !== selection.end.line;
+	
+	// Check if selection is entire paragraph(s)
+	const isEntireParagraph = isMultiLine || (
+		selection.start.character === 0 && 
+		(selection.end.character === editor.document.lineAt(selection.end.line).text.length ||
+		selection.end.character === 0)
+	);
+
+	// Check if text is already commented
+	const commentedInlinePattern = /^<!--\s*(.*?)\s*-->$/s;
+	const commentedBlockPattern = /^<!--\n([\s\S]*?)\n-->$/;
+	
+	if (commentedInlinePattern.test(text) || commentedBlockPattern.test(text)) {
+		// Uncomment - remove comment tags
+		let unCommentedText = text;
+		if (commentedBlockPattern.test(text)) {
+			unCommentedText = text.replace(/^<!--\n/, '').replace(/\n-->$/, '');
+		} else if (commentedInlinePattern.test(text)) {
+			unCommentedText = text.replace(/^<!--\s*/, '').replace(/\s*-->$/, '');
+		}
+		
+		editor.edit(editBuilder => {
+			editBuilder.replace(selection, unCommentedText);
+		});
+	} else {
+		// Comment - add comment tags
+		let commentedText: string;
+		
+		if (isEntireParagraph) {
+			// Block style: tags on separate lines
+			commentedText = `<!--\n${text}\n-->`;
+		} else {
+			// Inline style: tags on same line
+			commentedText = `<!-- ${text} -->`;
+		}
+		
+		editor.edit(editBuilder => {
+			editBuilder.replace(selection, commentedText);
+		});
+	}
 }
 
 export function deactivate() {

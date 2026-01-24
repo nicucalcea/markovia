@@ -1,10 +1,20 @@
 import * as vscode from 'vscode';
+import { AuthorshipManager } from './authorshipManager';
 
 export class MarkdownDecorator {
 	private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
+	private authorshipManagers: Map<string, AuthorshipManager> = new Map();
 	
 	constructor() {
 		this.createDecorationTypes();
+	}
+
+	public setAuthorshipManager(documentUri: string, manager: AuthorshipManager) {
+		this.authorshipManagers.set(documentUri, manager);
+	}
+
+	public removeAuthorshipManager(documentUri: string) {
+		this.authorshipManagers.delete(documentUri);
 	}
 
 	private createDecorationTypes() {
@@ -141,12 +151,37 @@ export class MarkdownDecorator {
 		this.decorationTypes.set('hr', vscode.window.createTextEditorDecorationType({
 			opacity: '0.3',
 		}));
+
+		// External content (authorship)
+		this.decorationTypes.set('external-content', vscode.window.createTextEditorDecorationType({
+			opacity: '0.45',
+		}));
+	}
+
+	private updateExternalContentDecoration() {
+		const config = vscode.workspace.getConfiguration('markovia');
+		const opacity = config.get<number>('authorshipOpacity', 0.45);
+		
+		// Dispose old decoration type
+		const oldDecorationType = this.decorationTypes.get('external-content');
+		if (oldDecorationType) {
+			oldDecorationType.dispose();
+		}
+
+		// Create new decoration type with updated opacity
+		this.decorationTypes.set('external-content', vscode.window.createTextEditorDecorationType({
+			opacity: opacity.toString(),
+		}));
 	}
 
 	public updateDecorations(editor: vscode.TextEditor) {
 		if (editor.document.languageId !== 'markdown') {
 			return;
 		}
+
+		// Check if authorship is enabled
+		const config = vscode.workspace.getConfiguration('markovia');
+		const authorshipEnabled = config.get<boolean>('enableAuthorship', true);
 
 		const text = editor.document.getText();
 		const decorations: Map<string, vscode.DecorationOptions[]> = new Map();
@@ -157,6 +192,28 @@ export class MarkdownDecorator {
 		}
 
 		this.parseAndDecorate(editor.document, text, decorations);
+
+		// Apply external content decorations if authorship is enabled
+		if (authorshipEnabled) {
+			const manager = this.authorshipManagers.get(editor.document.uri.toString());
+			if (manager) {
+				const externalLines = manager.getExternalLines();
+				const externalDecorations: vscode.DecorationOptions[] = [];
+
+				for (const lineNumber of externalLines) {
+					if (lineNumber < editor.document.lineCount) {
+						const line = editor.document.lineAt(lineNumber);
+						const range = new vscode.Range(
+							new vscode.Position(lineNumber, 0),
+							new vscode.Position(lineNumber, line.text.length)
+						);
+						externalDecorations.push({ range });
+					}
+				}
+
+				decorations.set('external-content', externalDecorations);
+			}
+		}
 
 		// Apply all decorations
 		for (const [key, decorationType] of this.decorationTypes) {

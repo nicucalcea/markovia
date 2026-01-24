@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
+import { AuthorshipManager } from './authorshipManager';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
+let authorshipManagers: Map<string, AuthorshipManager> = new Map();
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Markovia markdown editor is now active');
@@ -40,27 +42,59 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('markovia.toggleNumberedList', () => toggleList('1.')),
 		vscode.commands.registerCommand('markovia.toggleBlockquote', toggleBlockquote),
 		vscode.commands.registerCommand('markovia.insertHorizontalRule', insertHorizontalRule),
-		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar)
+		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar),
+		// Authorship commands
+		vscode.commands.registerCommand('markovia.pasteExternal', pasteExternal),
+		vscode.commands.registerCommand('markovia.markAsExternal', markAsExternal),
+		vscode.commands.registerCommand('markovia.markAsOwn', markAsOwn),
+		vscode.commands.registerCommand('markovia.toggleAuthorshipView', toggleAuthorshipView)
 	);
 
 	// Update decorations when switching editors or editing
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
+				initAuthorshipManager(editor.document);
 				updateDecorations(editor);
 			}
 		}),
 		vscode.workspace.onDidChangeTextDocument(event => {
 			const editor = vscode.window.activeTextEditor;
 			if (editor && event.document === editor.document) {
+				// Update authorship ranges based on changes
+				const manager = getAuthorshipManager(event.document);
+				if (manager) {
+					for (const change of event.contentChanges) {
+						manager.updateRangesAfterEdit(change);
+					}
+				}
 				updateDecorations(editor);
+			}
+		}),
+		vscode.workspace.onDidSaveTextDocument(document => {
+			// Force save authorship data when document is saved
+			const manager = getAuthorshipManager(document);
+			if (manager) {
+				manager.forceSave();
+			}
+		}),
+		vscode.workspace.onDidCloseTextDocument(document => {
+			// Clean up authorship manager
+			const uri = document.uri.toString();
+			const manager = authorshipManagers.get(uri);
+			if (manager) {
+				manager.dispose();
+				authorshipManagers.delete(uri);
+				decorator.removeAuthorshipManager(uri);
 			}
 		}),
 		vscode.workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration('markovia.showToolbar')) {
 				toolbarProvider.refresh();
 			}
-			if (e.affectsConfiguration('markovia.enableWYSIWYG')) {
+			if (e.affectsConfiguration('markovia.enableWYSIWYG') || 
+			    e.affectsConfiguration('markovia.enableAuthorship') ||
+			    e.affectsConfiguration('markovia.authorshipOpacity')) {
 				const editor = vscode.window.activeTextEditor;
 				if (editor) {
 					updateDecorations(editor);
@@ -72,8 +106,33 @@ export function activate(context: vscode.ExtensionContext) {
 	// Apply decorations to the current editor
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
+		initAuthorshipManager(editor.document);
 		updateDecorations(editor);
 	}
+
+	// Initialize authorship managers for all open markdown documents
+	vscode.workspace.textDocuments.forEach(document => {
+		if (document.languageId === 'markdown') {
+			initAuthorshipManager(document);
+		}
+	});
+}
+
+function initAuthorshipManager(document: vscode.TextDocument) {
+	if (document.languageId !== 'markdown') {
+		return;
+	}
+
+	const uri = document.uri.toString();
+	if (!authorshipManagers.has(uri)) {
+		const manager = new AuthorshipManager(document);
+		authorshipManagers.set(uri, manager);
+		decorator.setAuthorshipManager(uri, manager);
+	}
+}
+
+function getAuthorshipManager(document: vscode.TextDocument): AuthorshipManager | undefined {
+	return authorshipManagers.get(document.uri.toString());
 }
 
 function updateDecorations(editor: vscode.TextEditor) {
@@ -305,6 +364,81 @@ function insertHorizontalRule() {
 	editor.edit(editBuilder => {
 		editBuilder.insert(position, '\n---\n');
 	});
+}
+
+async function pasteExternal() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		return;
+	}
+
+	// Read clipboard content
+	const clipboardText = await vscode.env.clipboard.readText();
+	if (!clipboardText) {
+		vscode.window.showInformationMessage('Clipboard is empty');
+		return;
+	}
+
+	const position = editor.selection.active;
+	const startLine = position.line;
+	
+	// Insert the text
+	await editor.edit(editBuilder => {
+		editBuilder.insert(position, clipboardText);
+	});
+
+	// Calculate end line
+	const newLineCount = clipboardText.split('\n').length - 1;
+	const endLine = startLine + newLineCount;
+
+	// Mark as external
+	const manager = getAuthorshipManager(editor.document);
+	if (manager) {
+		manager.addExternalRange(startLine, endLine);
+		updateDecorations(editor);
+	}
+}
+
+function markAsExternal() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		return;
+	}
+
+	const selection = editor.selection;
+	const startLine = selection.start.line;
+	const endLine = selection.end.line;
+
+	const manager = getAuthorshipManager(editor.document);
+	if (manager) {
+		manager.addExternalRange(startLine, endLine);
+		updateDecorations(editor);
+		vscode.window.showInformationMessage('Marked as external content');
+	}
+}
+
+function markAsOwn() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		return;
+	}
+
+	const selection = editor.selection;
+	const startLine = selection.start.line;
+	const endLine = selection.end.line;
+
+	const manager = getAuthorshipManager(editor.document);
+	if (manager) {
+		manager.removeExternalRange(startLine, endLine);
+		updateDecorations(editor);
+		vscode.window.showInformationMessage('Marked as own content');
+	}
+}
+
+function toggleAuthorshipView() {
+	const config = vscode.workspace.getConfiguration('markovia');
+	const currentValue = config.get<boolean>('enableAuthorship', true);
+	config.update('enableAuthorship', !currentValue, vscode.ConfigurationTarget.Global);
 }
 
 export function deactivate() {

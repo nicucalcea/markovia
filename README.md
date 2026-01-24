@@ -14,6 +14,10 @@ A simple and lightweight Markdown editor for VS Code, inspired by Typora and iA 
   - **Blockquotes**: Content is italicized with `>` markers faded
   
 - **Top-of-File Toolbar**: Quick-access formatting buttons appear at the top of each Markdown file (using CodeLens)
+- **Authorship Tracking**: Distinguish your own writing from external sources (e.g., pasted text)
+  - **Visual De-emphasis**: External content is automatically greyed out (reduced opacity)
+  - **YAML Metadata**: Authorship ranges are stored in the file's frontmatter
+  - **Dynamic Tracking**: Highlighting stays accurate as you edit the document
 - **Keyboard Shortcuts**: Familiar shortcuts for fast formatting
 - **CommonMark Support**: Full support for standard Markdown features
 - **Clean & Lightweight**: No dependencies, pure TypeScript implementation
@@ -68,12 +72,26 @@ All shortcuts work only in Markdown files:
 - **Code Blocks**: When inserting a code block, you can specify the language for syntax highlighting.
 - **Lists & Blockquotes**: These work on entire lines. Select multiple lines to format them all at once.
 
+### Authorship Tracking
+
+Markovia allows you to track content that comes from external sources:
+
+- **Paste External**: Right-click and select "Paste External" to insert text and mark it as external content immediately.
+- **Mark as External**: Select any text, right-click, and choose "Mark as External".
+- **Mark as Own**: To revert external content to your own writing, select it and choose "Mark as Own".
+- **Visuals**: External content is displayed with reduced opacity (default 45%).
+- **Storage**: Tracking data is saved in a `authorship` block in the YAML frontmatter of your Markdown file.
+
+You can customize the opacity or disable this feature in settings.
+
 ## Extension Settings
 
 This extension contributes the following settings:
 
 - `markovia.showToolbar`: Enable/disable the formatting toolbar at the top of files (default: `true`)
 - `markovia.enableWYSIWYG`: Enable/disable WYSIWYG-style rendering with visible but deemphasized Markdown syntax (default: `true`)
+- `markovia.enableAuthorship`: Enable/disable authorship tracking and decorations (default: `true`)
+- `markovia.authorshipOpacity`: Adjust the opacity of external content, from `0.1` to `1.0` (default: `0.45`)
 
 You can toggle the toolbar with the command "Markovia: Toggle Toolbar" from the command palette.
 
@@ -87,6 +105,15 @@ No external dependencies required. Works with VS Code 1.108.1 and above.
 - Very long documents may experience slight rendering delays
 
 ## Release Notes
+
+### 0.1.0
+
+Added Authorship Tracking:
+- Distinguish between your own writing and external content
+- New "Paste External" context menu command
+- "Mark as External/Own" commands for manual control
+- Visual de-emphasis (greyed out text) for external content
+- Ranges are stored in YAML frontmatter and update dynamically during edits
 
 ### 0.0.1
 

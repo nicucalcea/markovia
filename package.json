@@ -2,7 +2,7 @@
   "name": "markovia",
   "displayName": "Markovia",
   "description": "Simple and lightweight Markdown editor for VS Code with formatting toolbar and keyboard shortcuts.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "nicu-calcea",
   "engines": {
     "vscode": "^1.108.1"
@@ -88,6 +88,22 @@
       {
         "command": "markovia.toggleToolbar",
         "title": "Markovia: Toggle Toolbar"
+      },
+      {
+        "command": "markovia.pasteExternal",
+        "title": "Markovia: Paste External"
+      },
+      {
+        "command": "markovia.markAsExternal",
+        "title": "Markovia: Mark as External"
+      },
+      {
+        "command": "markovia.markAsOwn",
+        "title": "Markovia: Mark as Own"
+      },
+      {
+        "command": "markovia.toggleAuthorshipView",
+        "title": "Markovia: Toggle Authorship View"
       }
     ],
     "keybindings": [
@@ -194,6 +210,25 @@
         "when": "editorTextFocus && editorLangId == markdown"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "markovia.pasteExternal",
+          "when": "editorLangId == markdown",
+          "group": "9_cutcopypaste@2"
+        },
+        {
+          "command": "markovia.markAsExternal",
+          "when": "editorLangId == markdown && editorHasSelection",
+          "group": "markovia@1"
+        },
+        {
+          "command": "markovia.markAsOwn",
+          "when": "editorLangId == markdown && editorHasSelection",
+          "group": "markovia@2"
+        }
+      ]
+    },
     "configuration": {
       "title": "Markovia",
       "properties": {
@@ -206,6 +241,18 @@
           "type": "boolean",
           "default": true,
           "description": "Enable WYSIWYG-style rendering with visible but deemphasized Markdown syntax"
+        },
+        "markovia.enableAuthorship": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable authorship tracking and visual decorations"
+        },
+        "markovia.authorshipOpacity": {
+          "type": "number",
+          "default": 0.45,
+          "minimum": 0.1,
+          "maximum": 1.0,
+          "description": "Opacity level for external content (0.1 = very faint, 1.0 = normal)"
         }
       }
     }
@@ -219,13 +266,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.108.1",
+    "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.52.0",
+    "@types/vscode": "^1.108.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.52.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
   }
 }

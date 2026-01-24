@@ -34,6 +34,10 @@
         "title": "Markovia: Toggle Inline Code"
       },
       {
+        "command": "markovia.toggleUnderline",
+        "title": "Markovia: Toggle Underline"
+      },
+      {
         "command": "markovia.insertLink",
         "title": "Markovia: Insert Link"
       },
@@ -88,6 +92,10 @@
       {
         "command": "markovia.toggleToolbar",
         "title": "Markovia: Toggle Toolbar"
+      },
+      {
+        "command": "markovia.onEnterKey",
+        "title": "Markovia: Handle Enter Key"
       }
     ],
     "keybindings": [
@@ -113,6 +121,12 @@
         "command": "markovia.toggleCode",
         "key": "ctrl+`",
         "mac": "cmd+`",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleUnderline",
+        "key": "ctrl+u",
+        "mac": "cmd+u",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
@@ -192,6 +206,12 @@
         "key": "ctrl+shift+h",
         "mac": "cmd+shift+h",
         "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.onEnterKey",
+        "key": "enter",
+        "mac": "enter",
+        "when": "editorTextFocus && editorLangId == markdown && !suggestWidgetVisible && !editorHasMultipleSelections"
       }
     ],
     "configuration": {

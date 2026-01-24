@@ -46,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('markovia.toggleItalic', () => wrapSelection('*', '*')),
 		vscode.commands.registerCommand('markovia.toggleStrikethrough', () => wrapSelection('~~', '~~')),
 		vscode.commands.registerCommand('markovia.toggleCode', () => wrapSelection('`', '`')),
+		vscode.commands.registerCommand('markovia.toggleUnderline', () => wrapSelection('<u>', '</u>')),
 		vscode.commands.registerCommand('markovia.insertLink', insertLink),
 		vscode.commands.registerCommand('markovia.insertImage', insertImage),
 		vscode.commands.registerCommand('markovia.insertCodeBlock', insertCodeBlock),
@@ -61,7 +62,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('markovia.insertHorizontalRule', insertHorizontalRule),
 		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar),
 		vscode.commands.registerCommand('markovia.showDatePicker', showDatePicker),
-		vscode.commands.registerCommand('markovia.toggleComment', toggleComment)
+		vscode.commands.registerCommand('markovia.toggleComment', toggleComment),
+		vscode.commands.registerCommand('markovia.onEnterKey', handleEnterKey)
 	);
 
 	// Update decorations when switching editors or editing
@@ -423,6 +425,63 @@ function toggleComment() {
 			editBuilder.replace(selection, commentedText);
 		});
 	}
+}
+
+async function handleEnterKey() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		// Fall back to default enter behavior
+		await vscode.commands.executeCommand('type', { text: '\n' });
+		return;
+	}
+
+	const position = editor.selection.active;
+	const line = editor.document.lineAt(position.line);
+	const lineText = line.text;
+
+	// Check for bullet list
+	const bulletMatch = lineText.match(/^(\s*)([-*+])\s+(.*)$/);
+	if (bulletMatch) {
+		const [, indent, marker, content] = bulletMatch;
+		
+		// If content is empty, remove the bullet point
+		if (!content.trim()) {
+			await editor.edit(editBuilder => {
+				editBuilder.delete(line.range);
+			});
+			return;
+		}
+
+		// Insert new bullet point
+		await editor.edit(editBuilder => {
+			editBuilder.insert(position, `\n${indent}${marker} `);
+		});
+		return;
+	}
+
+	// Check for ordered list
+	const numberedMatch = lineText.match(/^(\s*)(\d+)\.\s+(.*)$/);
+	if (numberedMatch) {
+		const [, indent, number, content] = numberedMatch;
+		
+		// If content is empty, remove the numbered list item
+		if (!content.trim()) {
+			await editor.edit(editBuilder => {
+				editBuilder.delete(line.range);
+			});
+			return;
+		}
+
+		// Insert new numbered list item with incremented number
+		const nextNumber = parseInt(number) + 1;
+		await editor.edit(editBuilder => {
+			editBuilder.insert(position, `\n${indent}${nextNumber}. `);
+		});
+		return;
+	}
+
+	// Default behavior - just insert a newline
+	await vscode.commands.executeCommand('type', { text: '\n' });
 }
 
 export function deactivate() {

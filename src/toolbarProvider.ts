@@ -33,6 +33,11 @@ export class MarkdownToolbarProvider implements vscode.CodeLensProvider {
 				command: 'markovia.toggleItalic'
 			}),
 			new vscode.CodeLens(topOfDocument, {
+				title: '$(symbol-misc) Underline',
+				tooltip: 'Underline (Ctrl+U)',
+				command: 'markovia.toggleUnderline'
+			}),
+			new vscode.CodeLens(topOfDocument, {
 				title: '$(link) Link',
 				tooltip: 'Insert Link (Ctrl+K)',
 				command: 'markovia.insertLink'

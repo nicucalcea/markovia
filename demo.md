@@ -16,6 +16,7 @@ Markovia uses a WYSIWYG approach inspired by **iA Writer**, where:
 2. *Italic text* actually appears italic
 3. `Inline code` has a subtle background
 4. [Links look clickable](https://example.com) with deemphasized URLs
+5. <u>Underline</u>
 
 #### Code Blocks
 

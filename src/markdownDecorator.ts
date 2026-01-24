@@ -88,6 +88,15 @@ export class MarkdownDecorator {
 			opacity: '0.3',
 		}));
 
+		// Underline
+		this.decorationTypes.set('underline-content', vscode.window.createTextEditorDecorationType({
+			textDecoration: 'underline',
+		}));
+		
+		this.decorationTypes.set('underline-syntax', vscode.window.createTextEditorDecorationType({
+			opacity: '0.3',
+		}));
+
 		// Inline code - with background
 		this.decorationTypes.set('code-content', vscode.window.createTextEditorDecorationType({
 			backgroundColor: new vscode.ThemeColor('editor.inlineCodeBackground'),
@@ -416,6 +425,36 @@ export class MarkdownDecorator {
 			});
 
 			decorations.get('strikethrough-syntax')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, contentEnd),
+					new vscode.Position(lineStart.line, fullEnd)
+				)
+			});
+		}
+
+		// Underline: <u>text</u>
+		const underlineRegex = /<u>([^<]+)<\/u>/g;
+		while ((match = underlineRegex.exec(line)) !== null) {
+			const fullStart = match.index;
+			const contentStart = fullStart + 3; // <u>
+			const contentEnd = contentStart + match[1].length;
+			const fullEnd = match.index + match[0].length;
+
+			decorations.get('underline-syntax')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, fullStart),
+					new vscode.Position(lineStart.line, contentStart)
+				)
+			});
+
+			decorations.get('underline-content')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, contentStart),
+					new vscode.Position(lineStart.line, contentEnd)
+				)
+			});
+
+			decorations.get('underline-syntax')?.push({
 				range: new vscode.Range(
 					new vscode.Position(lineStart.line, contentEnd),
 					new vscode.Position(lineStart.line, fullEnd)

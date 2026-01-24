@@ -1,0 +1,231 @@
+{
+  "name": "markovia",
+  "displayName": "Markovia",
+  "description": "Simple and lightweight Markdown editor for VS Code with formatting toolbar and keyboard shortcuts.",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "markovia.toggleBold",
+        "title": "Markovia: Toggle Bold"
+      },
+      {
+        "command": "markovia.toggleItalic",
+        "title": "Markovia: Toggle Italic"
+      },
+      {
+        "command": "markovia.toggleStrikethrough",
+        "title": "Markovia: Toggle Strikethrough"
+      },
+      {
+        "command": "markovia.toggleCode",
+        "title": "Markovia: Toggle Inline Code"
+      },
+      {
+        "command": "markovia.insertLink",
+        "title": "Markovia: Insert Link"
+      },
+      {
+        "command": "markovia.insertImage",
+        "title": "Markovia: Insert Image"
+      },
+      {
+        "command": "markovia.insertCodeBlock",
+        "title": "Markovia: Insert Code Block"
+      },
+      {
+        "command": "markovia.toggleHeading1",
+        "title": "Markovia: Toggle Heading 1"
+      },
+      {
+        "command": "markovia.toggleHeading2",
+        "title": "Markovia: Toggle Heading 2"
+      },
+      {
+        "command": "markovia.toggleHeading3",
+        "title": "Markovia: Toggle Heading 3"
+      },
+      {
+        "command": "markovia.toggleHeading4",
+        "title": "Markovia: Toggle Heading 4"
+      },
+      {
+        "command": "markovia.toggleHeading5",
+        "title": "Markovia: Toggle Heading 5"
+      },
+      {
+        "command": "markovia.toggleHeading6",
+        "title": "Markovia: Toggle Heading 6"
+      },
+      {
+        "command": "markovia.toggleBulletList",
+        "title": "Markovia: Toggle Bullet List"
+      },
+      {
+        "command": "markovia.toggleNumberedList",
+        "title": "Markovia: Toggle Numbered List"
+      },
+      {
+        "command": "markovia.toggleBlockquote",
+        "title": "Markovia: Toggle Blockquote"
+      },
+      {
+        "command": "markovia.insertHorizontalRule",
+        "title": "Markovia: Insert Horizontal Rule"
+      },
+      {
+        "command": "markovia.toggleToolbar",
+        "title": "Markovia: Toggle Toolbar"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "markovia.toggleBold",
+        "key": "ctrl+b",
+        "mac": "cmd+b",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleItalic",
+        "key": "ctrl+i",
+        "mac": "cmd+i",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleStrikethrough",
+        "key": "ctrl+shift+x",
+        "mac": "cmd+shift+x",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleCode",
+        "key": "ctrl+`",
+        "mac": "cmd+`",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.insertLink",
+        "key": "ctrl+k",
+        "mac": "cmd+k",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.insertImage",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.insertCodeBlock",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading1",
+        "key": "ctrl+shift+1",
+        "mac": "cmd+shift+1",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading2",
+        "key": "ctrl+shift+2",
+        "mac": "cmd+shift+2",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading3",
+        "key": "ctrl+shift+3",
+        "mac": "cmd+shift+3",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading4",
+        "key": "ctrl+shift+4",
+        "mac": "cmd+shift+4",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading5",
+        "key": "ctrl+shift+5",
+        "mac": "cmd+shift+5",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleHeading6",
+        "key": "ctrl+shift+6",
+        "mac": "cmd+shift+6",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleBulletList",
+        "key": "ctrl+shift+8",
+        "mac": "cmd+shift+8",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleNumberedList",
+        "key": "ctrl+shift+7",
+        "mac": "cmd+shift+7",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.toggleBlockquote",
+        "key": "ctrl+shift+9",
+        "mac": "cmd+shift+9",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markovia.insertHorizontalRule",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ],
+    "configuration": {
+      "title": "Markovia",
+      "properties": {
+        "markovia.showToolbar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the formatting toolbar in the status bar"
+        },
+        "markovia.enableWYSIWYG": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable WYSIWYG-style rendering with visible but deemphasized Markdown syntax"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.108.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.52.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}

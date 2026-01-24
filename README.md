@@ -101,6 +101,41 @@ Initial release:
 
 ---
 
+## Installation
+
+To permanently install this extension locally without publishing to the Marketplace:
+
+1. **Install the VS Code Extension Manager**:
+   ```bash
+   npm install -g @vscode/vsce
+   ```
+
+2. **Package the extension**:
+   ```bash
+   npx @vscode/vsce package
+   ```
+   This will generate a `.vsix` file (e.g., `markovia-0.0.1.vsix`).
+
+3. **Install from VSIX**:
+   - Open VS Code.
+   - Go to the **Extensions** view (`Ctrl+Shift+X`).
+   - Click the **...** (More Actions) menu in the top right.
+   - Select **Install from VSIX...** and choose the generated file.
+
+## Distribution
+
+This project is configured to automate releases via GitHub Actions.
+
+### Automated Releases
+To create a new release with a packaged `.vsix` file:
+1. Update the version in `package.json`.
+2. Create and push a git tag:
+   ```bash
+   git tag v0.0.1
+   git push origin v0.0.1
+   ```
+3. GitHub Actions will automatically build, package, and create a GitHub Release with the `.vsix` attached.
+
 ## Development
 
 To build and test the extension locally:

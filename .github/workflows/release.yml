@@ -25,8 +25,7 @@ jobs:
         run: npm run compile
 
       - name: Package Extension
-        # Use --no-git-tag-check because we're already triggering on a tag
-        run: npx @vscode/vsce package --no-git-tag-check
+        run: npx @vscode/vsce package
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

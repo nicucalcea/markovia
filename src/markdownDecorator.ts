@@ -137,14 +137,14 @@ export class MarkdownDecorator {
 			opacity: '0.9',
 		}));
 
-		// Code blocks
-		this.decorationTypes.set('codeblock-fence', vscode.window.createTextEditorDecorationType({
-			opacity: '0.3',
-		}));
+		// // Code blocks
+		// this.decorationTypes.set('codeblock-fence', vscode.window.createTextEditorDecorationType({
+		// 	opacity: '0.3',
+		// }));
 		
-		this.decorationTypes.set('codeblock-content', vscode.window.createTextEditorDecorationType({
-			backgroundColor: new vscode.ThemeColor('textCodeBlock.background'),
-		}));
+		// this.decorationTypes.set('codeblock-content', vscode.window.createTextEditorDecorationType({
+		// 	backgroundColor: new vscode.ThemeColor('textCodeBlock.background'),
+		// }));
 
 		// Horizontal rule
 		this.decorationTypes.set('hr', vscode.window.createTextEditorDecorationType({

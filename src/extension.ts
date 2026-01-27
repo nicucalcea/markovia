@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
 import { TaskAutoSuggestProvider, showDatePicker } from './taskAutoSuggest';
+import { MarkdownPasteHandler } from './pasteHandler';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
@@ -30,6 +31,19 @@ export function activate(context: vscode.ExtensionContext) {
 			{ language: 'markdown', scheme: 'file' },
 			taskAutoSuggestProvider,
 			' ' // Trigger on space after checkbox
+		)
+	);
+
+	// Register paste handler to preserve Markdown formatting
+	const pasteHandler = new MarkdownPasteHandler();
+	context.subscriptions.push(
+		vscode.languages.registerDocumentPasteEditProvider(
+			{ language: 'markdown', scheme: 'file' },
+			pasteHandler,
+			{ 
+				pasteMimeTypes: ['text/html'],
+				providedPasteEditKinds: [vscode.DocumentDropOrPasteEditKind.Empty]
+			}
 		)
 	);
 
@@ -125,19 +139,27 @@ function updateWordCount(editor: vscode.TextEditor | undefined) {
 
 	const text = editor.document.getText();
 	
-	// Character count (including spaces)
-	const charCount = text.length;
+	// Remove HTML comments
+	const textWithoutComments = text.replace(/<!--[\s\S]*?-->/g, '');
+	
+	// Character count (excluding newlines)
+	const charCount = textWithoutComments.replace(/\n/g, '').length;
 	
 	// Character count (excluding spaces and newlines)
-	const charCountNoSpaces = text.replace(/\s/g, '').length;
+	const charCountNoSpaces = textWithoutComments.replace(/\s/g, '').length;
 	
 	// Word count (split by whitespace, filter empty strings)
-	const words = text.split(/\s+/).filter(word => word.length > 0);
+	const words = textWithoutComments.split(/\s+/).filter(word => word.length > 0);
 	const wordCount = words.length;
 	
+	// Format numbers with thousands separators
+	const formatNumber = (num: number): string => {
+		return num.toLocaleString('en-US');
+	};
+	
 	// Update status bar
-	statusBarItem.text = `$(pencil) ${wordCount} words, ${charCount} chars`;
-	statusBarItem.tooltip = `Words: ${wordCount}\nCharacters: ${charCount}\nCharacters (no spaces): ${charCountNoSpaces}`;
+	statusBarItem.text = `$(pencil) ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`;
+	statusBarItem.tooltip = `Words: ${formatNumber(wordCount)}\nCharacters: ${formatNumber(charCount)}\nCharacters (no spaces): ${formatNumber(charCountNoSpaces)}`;
 	statusBarItem.show();
 }
 

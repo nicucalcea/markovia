@@ -282,6 +282,9 @@ export class MarkdownDecorator {
 		line: string,
 		decorations: Map<string, vscode.DecorationOptions[]>
 	) {
+		// Track ranges that should be excluded from italic/bold parsing (e.g., inside links)
+		const excludedRanges: Array<{start: number, end: number}> = [];
+
 		// Links: [text](url)
 		const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
 		let match;
@@ -292,6 +295,9 @@ export class MarkdownDecorator {
 			const textEnd = textStart + match[1].length;
 			const urlStart = textEnd + 2; // ](
 			const urlEnd = urlStart + match[2].length;
+
+			// Exclude the entire link from other formatting
+			excludedRanges.push({start: fullStart, end: fullEnd});
 
 			// Opening bracket
 			decorations.get('link-syntax')?.push({
@@ -334,6 +340,15 @@ export class MarkdownDecorator {
 			});
 		}
 
+		// Helper function to check if a range overlaps with excluded ranges
+		const isExcluded = (start: number, end: number): boolean => {
+			return excludedRanges.some(excluded => 
+				(start >= excluded.start && start < excluded.end) ||
+				(end > excluded.start && end <= excluded.end) ||
+				(start <= excluded.start && end >= excluded.end)
+			);
+		};
+
 		// Bold: **text** or __text__
 		const boldRegex = /(\*\*|__)([^*_]+)\1/g;
 		while ((match = boldRegex.exec(line)) !== null) {
@@ -342,6 +357,11 @@ export class MarkdownDecorator {
 			const contentStart = fullStart + syntaxLen;
 			const contentEnd = contentStart + match[2].length;
 			const fullEnd = match.index + match[0].length;
+
+			// Skip if inside a link or other excluded range
+			if (isExcluded(fullStart, fullEnd)) {
+				continue;
+			}
 
 			// Opening syntax
 			decorations.get('bold-syntax')?.push({
@@ -376,6 +396,11 @@ export class MarkdownDecorator {
 			const content = match[1] || match[2];
 			const contentEnd = contentStart + content.length;
 			const fullEnd = match.index + match[0].length;
+
+			// Skip if inside a link or other excluded range
+			if (isExcluded(fullStart, fullEnd)) {
+				continue;
+			}
 
 			// Opening syntax
 			decorations.get('italic-syntax')?.push({

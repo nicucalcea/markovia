@@ -3,12 +3,17 @@ import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
 import { TaskAutoSuggestProvider, showDatePicker } from './taskAutoSuggest';
 import { MarkdownPasteHandler } from './pasteHandler';
+import { TodoPanelProvider } from './todoPanel';
+import { TodoItem } from './todoTypes';
+import { TodoNotificationService } from './todoNotificationService';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
 let statusBarItem: vscode.StatusBarItem;
+let todoPanelProvider: TodoPanelProvider;
+let todoNotificationService: TodoNotificationService | undefined;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	console.log('Markovia markdown editor is now active');
 
 	// Initialize the WYSIWYG decorator
@@ -53,6 +58,59 @@ export function activate(context: vscode.ExtensionContext) {
 		100 // Priority - higher = more to the right
 	);
 	context.subscriptions.push(statusBarItem);
+
+	// Initialize TODO panel
+	const config = vscode.workspace.getConfiguration('markovia');
+	const todoPanelEnabled = config.get<boolean>('todoPanel.enabled', true);
+	
+	if (todoPanelEnabled) {
+		todoPanelProvider = new TodoPanelProvider();
+		const todoTreeView = vscode.window.createTreeView('markoviaTodoPanel', {
+			treeDataProvider: todoPanelProvider
+		});
+		context.subscriptions.push(todoTreeView);
+
+		// Initial scan
+		await todoPanelProvider.scan();
+
+		// Initialize notification service
+		todoNotificationService = new TodoNotificationService(context, todoPanelProvider);
+		context.subscriptions.push(todoNotificationService);
+
+		// Check and show notification on startup
+		await todoNotificationService.checkAndNotify();
+
+		// Schedule daily notifications at configured time
+		todoNotificationService.scheduleNextCheck();
+
+		// Register TODO panel commands
+		context.subscriptions.push(
+			vscode.commands.registerCommand('markovia.refreshTodoPanel', () => {
+				todoPanelProvider.scan();
+			}),
+			vscode.commands.registerCommand('markovia.openTodoItem', (todo: TodoItem) => {
+				openTodoItem(todo);
+			})
+		);
+
+		// Watch for file changes
+		context.subscriptions.push(
+			vscode.workspace.onDidSaveTextDocument(document => {
+				if (document.languageId === 'markdown') {
+					todoPanelProvider.updateFile(document);
+				}
+			}),
+			vscode.workspace.onDidDeleteFiles(event => {
+				event.files.forEach(uri => {
+					todoPanelProvider.removeFile(uri);
+				});
+			}),
+			vscode.workspace.onDidCreateFiles(async () => {
+				// Rescan on new file creation
+				await todoPanelProvider.scan();
+			})
+		);
+	}
 
 	// Register all formatting commands
 	context.subscriptions.push(
@@ -504,6 +562,26 @@ async function handleEnterKey() {
 
 	// Default behavior - just insert a newline
 	await vscode.commands.executeCommand('type', { text: '\n' });
+}
+
+/**
+ * Open a TODO item in the editor
+ */
+async function openTodoItem(todo: TodoItem) {
+	try {
+		const document = await vscode.workspace.openTextDocument(todo.uri);
+		const editor = await vscode.window.showTextDocument(document);
+		
+		// Navigate to the line
+		const position = new vscode.Position(todo.lineNumber - 1, 0);
+		editor.selection = new vscode.Selection(position, position);
+		editor.revealRange(
+			new vscode.Range(position, position),
+			vscode.TextEditorRevealType.InCenter
+		);
+	} catch (error) {
+		vscode.window.showErrorMessage(`Failed to open TODO item: ${error}`);
+	}
 }
 
 export function deactivate() {

@@ -2,7 +2,7 @@
   "name": "markovia",
   "displayName": "Markovia",
   "description": "Simple and lightweight Markdown editor for VS Code with formatting toolbar and keyboard shortcuts.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "nicu-calcea",
   "engines": {
     "vscode": "^1.108.1"
@@ -96,8 +96,31 @@
       {
         "command": "markovia.onEnterKey",
         "title": "Markovia: Handle Enter Key"
+      },
+      {
+        "command": "markovia.refreshTodoPanel",
+        "title": "Markovia: Refresh TODO Panel",
+        "icon": "$(refresh)"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "markoviaTodoPanel",
+          "name": "Markovia TODOs",
+          "when": "config.markovia.todoPanel.enabled"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "markovia.refreshTodoPanel",
+          "when": "view == markoviaTodoPanel",
+          "group": "navigation"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "markovia.toggleBold",
@@ -226,6 +249,27 @@
           "type": "boolean",
           "default": true,
           "description": "Enable WYSIWYG-style rendering with visible but deemphasized Markdown syntax"
+        },
+        "markovia.todoPanel.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the TODO panel in the sidebar"
+        },
+        "markovia.todoPanel.notifications.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for overdue and today's tasks on VS Code launch and daily at configured time"
+        },
+        "markovia.todoPanel.notifications.useSystem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use native system notifications instead of VS Code notifications"
+        },
+        "markovia.todoPanel.notifications.time": {
+          "type": "string",
+          "default": "09:00",
+          "description": "Time to show daily task notifications (24-hour format, e.g., 09:00)",
+          "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
         }
       }
     }
@@ -239,13 +283,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.108.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.52.0",
+    "@types/node-notifier": "^8.0.5",
+    "@types/vscode": "^1.108.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.52.0"
+  },
+  "dependencies": {
+    "node-notifier": "^10.0.1"
   }
 }

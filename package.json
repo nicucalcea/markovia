@@ -101,6 +101,10 @@
         "command": "markovia.refreshTodoPanel",
         "title": "Markovia: Refresh TODO Panel",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "markovia.openTodoItem",
+        "title": "Markovia: Open TODO Item"
       }
     ],
     "views": {

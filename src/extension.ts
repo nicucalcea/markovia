@@ -70,19 +70,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 		context.subscriptions.push(todoTreeView);
 
-		// Initial scan
-		await todoPanelProvider.scan();
-
-		// Initialize notification service
-		todoNotificationService = new TodoNotificationService(context, todoPanelProvider);
-		context.subscriptions.push(todoNotificationService);
-
-		// Check and show notification on startup
-		await todoNotificationService.checkAndNotify();
-
-		// Schedule daily notifications at configured time
-		todoNotificationService.scheduleNextCheck();
-
 		// Register TODO panel commands
 		context.subscriptions.push(
 			vscode.commands.registerCommand('markovia.refreshTodoPanel', () => {
@@ -110,6 +97,23 @@ export async function activate(context: vscode.ExtensionContext) {
 				await todoPanelProvider.scan();
 			})
 		);
+
+		// Initial scan (non-blocking)
+		todoPanelProvider.scan().catch(error => {
+			console.error('Markovia: Initial TODO scan failed:', error);
+		});
+
+		// Initialize notification service
+		todoNotificationService = new TodoNotificationService(context, todoPanelProvider);
+		context.subscriptions.push(todoNotificationService);
+
+		// Check and show notification on startup (non-blocking)
+		todoNotificationService.checkAndNotify().catch(error => {
+			console.error('Markovia: Initial notification check failed:', error);
+		});
+
+		// Schedule daily notifications at configured time
+		todoNotificationService.scheduleNextCheck();
 	}
 
 	// Register all formatting commands

@@ -1,13 +1,17 @@
 import * as vscode from 'vscode';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
-import { TaskAutoSuggestProvider, showDatePicker, showRecurrencePicker } from './taskAutoSuggest';
 import { MarkdownPasteHandler } from './pasteHandler';
-import { TodoPanelProvider } from './todoPanel';
-import { TodoItem } from './todoTypes';
-import { TodoNotificationService } from './todoNotificationService';
-import { toggleTaskCompletion } from './taskCompletion';
-import { TaskCodeLensProvider } from './taskCodeLensProvider';
+import { 
+	TaskAutoSuggestProvider, 
+	showDatePicker, 
+	showRecurrencePicker,
+	TodoPanelProvider,
+	TodoItem,
+	TodoNotificationService,
+	toggleTaskCompletion,
+	TaskCodeLensProvider
+} from './tasks';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;

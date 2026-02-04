@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TODO_PATTERNS } from './todoTypes';
+import { TODO_PATTERNS } from './types';
 import { parseRecurrence, calculateNextOccurrence, formatDateForTask, addDays, daysBetween } from './recurrence';
 
 /**
@@ -106,9 +106,17 @@ async function createNextOccurrence(
 	const newTaskText = createNewTaskText(originalLineText, taskContent, nextDate);
 
 	// Insert the new task on the line immediately below the completed task
+	// Check if the next line exists and if it's empty
+	const nextLineNumber = lineNumber + 1;
+	const hasNextLine = nextLineNumber < editor.document.lineCount;
+	const nextLineIsEmpty = hasNextLine && editor.document.lineAt(nextLineNumber).text.trim() === '';
+	
+	// If there's no next line or the next line has content, we need to add a newline before the new task
 	const insertPosition = new vscode.Position(lineNumber + 1, 0);
+	const textToInsert = (!hasNextLine || !nextLineIsEmpty) ? '\n' + newTaskText : newTaskText + '\n';
+	
 	await editor.edit(editBuilder => {
-		editBuilder.insert(insertPosition, newTaskText + '\n');
+		editBuilder.insert(insertPosition, textToInsert);
 	});
 }
 

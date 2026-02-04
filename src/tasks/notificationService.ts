@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { TodoPanelProvider } from './todoPanel';
-import { DateSection, buildTaskNotificationMessage } from './todoTypes';
+import { TodoPanelProvider } from './panel';
+import { DateSection, buildTaskNotificationMessage } from './types';
 
 // Dynamic import for node-notifier to handle module issues
 const notifier = require('node-notifier');

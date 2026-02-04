@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { isUncompletedTask, isCompletedTask } from './taskCompletion';
+import { isUncompletedTask, isCompletedTask } from './completion';
 
 /**
  * Provides CodeLens buttons for task completion

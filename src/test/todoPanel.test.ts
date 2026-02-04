@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { TodoScanner } from '../todoScanner';
-import { DateSection } from '../todoTypes';
+import { TodoScanner } from '../tasks/scanner';
+import { DateSection } from '../tasks/types';
 
 suite('TODO Panel Test Suite', () => {
 	vscode.window.showInformationMessage('Start TODO panel tests.');

@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { RecurrenceRule } from './recurrence';
 
+// Re-export patterns for backward compatibility
+export { TODO_PATTERNS, TASK_PATTERNS, METADATA_PATTERNS } from './patterns';
+
 /**
  * Represents a single TODO item found in a markdown file
  */
@@ -55,18 +58,6 @@ export enum TodoTreeItemType {
 	Section = 'section',
 	Todo = 'todo'
 }
-
-/**
- * Regex patterns for parsing TODO items
- */
-export const TODO_PATTERNS = {
-	task: /^\s*[-*+]\s+\[\s\]\s+(.*)$/,
-	completedTask: /^\s*[-*+]\s+\[x\]\s+(.*)$/i,
-	date: /📅\s*(\d{4}-\d{2}-\d{2})/,
-	// Recurrence pattern: 🔁 followed by text until end of line
-	// Using \uFE0F? to handle optional variation selector
-	recurrence: /🔁\uFE0F?\s*([a-zA-Z0-9, !]+)$/
-};
 
 /**
  * Get date section info mapping

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { METADATA_PATTERNS } from './tasks/patterns';
 
 export class MarkdownDecorator {
 	private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
@@ -564,9 +565,9 @@ export class MarkdownDecorator {
 			});
 		}
 
-		// Recurrence pattern: 🔁 followed by text until end of line
-		const recurrenceRegex = /🔁\uFE0F?\s*([a-zA-Z0-9, !]+)$/;
-		const recurrenceMatch = recurrenceRegex.exec(line);
+		// Recurrence pattern: 🔁 followed by text (not anchored to end of line)
+		// Use a lookahead to not consume the trailing space or end
+		const recurrenceMatch = METADATA_PATTERNS.recurrence.exec(line);
 		if (recurrenceMatch) {
 			const emojiPos = recurrenceMatch.index;
 			const patternStart = emojiPos + (recurrenceMatch[0].length - recurrenceMatch[1].length);

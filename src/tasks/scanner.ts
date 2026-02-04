@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { execFile } from 'child_process';
-import { TodoItem, TODO_PATTERNS } from './todoTypes';
+import { TodoItem, TODO_PATTERNS, METADATA_PATTERNS } from './types';
 import { parseRecurrence } from './recurrence';
 
 /**
@@ -213,7 +213,7 @@ export class TodoScanner {
 			hasDate = true;
 			
 			// Remove date emoji and date from display text
-			displayText = content.replace(/📅\s*\d{4}-\d{2}-\d{2}/, '').trim();
+			displayText = content.replace(METADATA_PATTERNS.date, '').trim();
 		}
 
 		// Extract recurrence if present

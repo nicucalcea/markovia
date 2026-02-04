@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { TodoItem, DateSection, TodoTreeItemType, getDateSectionInfo, getStartOfDay, formatDate } from './todoTypes';
-import { TodoScanner } from './todoScanner';
+import { TodoItem, DateSection, TodoTreeItemType, getDateSectionInfo, getStartOfDay, formatDate } from './types';
+import { TodoScanner } from './scanner';
 
 /**
  * Tree item for the TODO panel

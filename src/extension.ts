@@ -1,14 +1,17 @@
 import * as vscode from 'vscode';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
-import { TaskAutoSuggestProvider, showDatePicker } from './taskAutoSuggest';
+import { TaskAutoSuggestProvider, showDatePicker, showRecurrencePicker } from './taskAutoSuggest';
 import { MarkdownPasteHandler } from './pasteHandler';
 import { TodoPanelProvider } from './todoPanel';
 import { TodoItem } from './todoTypes';
 import { TodoNotificationService } from './todoNotificationService';
+import { toggleTaskCompletion } from './taskCompletion';
+import { TaskCodeLensProvider } from './taskCodeLensProvider';
 
 let decorator: MarkdownDecorator;
 let toolbarProvider: MarkdownToolbarProvider;
+let taskCodeLensProvider: TaskCodeLensProvider;
 let statusBarItem: vscode.StatusBarItem;
 let todoPanelProvider: TodoPanelProvider;
 let todoNotificationService: TodoNotificationService | undefined;
@@ -26,6 +29,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCodeLensProvider(
 			{ language: 'markdown', scheme: 'file' },
 			toolbarProvider
+		)
+	);
+
+	// Initialize the task CodeLens provider
+	taskCodeLensProvider = new TaskCodeLensProvider();
+	context.subscriptions.push(
+		vscode.languages.registerCodeLensProvider(
+			{ language: 'markdown', scheme: 'file' },
+			taskCodeLensProvider
 		)
 	);
 
@@ -138,8 +150,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('markovia.insertHorizontalRule', insertHorizontalRule),
 		vscode.commands.registerCommand('markovia.toggleToolbar', toggleToolbar),
 		vscode.commands.registerCommand('markovia.showDatePicker', showDatePicker),
+		vscode.commands.registerCommand('markovia.showRecurrencePicker', showRecurrencePicker),
 		vscode.commands.registerCommand('markovia.toggleComment', toggleComment),
-		vscode.commands.registerCommand('markovia.onEnterKey', handleEnterKey)
+		vscode.commands.registerCommand('markovia.onEnterKey', handleEnterKey),
+		vscode.commands.registerCommand('markovia.toggleTaskCompletion', handleToggleTaskCompletion),
+		vscode.commands.registerCommand('markovia.completeTaskAtLine', handleCompleteTaskAtLine)
 	);
 
 	// Update decorations when switching editors or editing
@@ -155,6 +170,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (editor && event.document === editor.document) {
 				updateDecorations(editor);
 				updateWordCount(editor);
+				
+				// Refresh task CodeLens when document changes
+				if (event.document.languageId === 'markdown') {
+					taskCodeLensProvider.refresh();
+				}
 			}
 		}),
 		vscode.workspace.onDidChangeConfiguration(e => {
@@ -566,6 +586,40 @@ async function handleEnterKey() {
 
 	// Default behavior - just insert a newline
 	await vscode.commands.executeCommand('type', { text: '\n' });
+}
+
+/**
+ * Handle toggle task completion command
+ */
+async function handleToggleTaskCompletion() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		return;
+	}
+
+	await toggleTaskCompletion(editor);
+	
+	// Refresh task CodeLens after completion
+	taskCodeLensProvider.refresh();
+}
+
+/**
+ * Handle complete task at specific line command (from CodeLens)
+ */
+async function handleCompleteTaskAtLine(lineNumber: number) {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || editor.document.languageId !== 'markdown') {
+		return;
+	}
+
+	// Move cursor to the specified line
+	const position = new vscode.Position(lineNumber, 0);
+	editor.selection = new vscode.Selection(position, position);
+
+	await toggleTaskCompletion(editor);
+	
+	// Refresh task CodeLens after completion
+	taskCodeLensProvider.refresh();
 }
 
 /**

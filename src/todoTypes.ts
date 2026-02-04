@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { RecurrenceRule } from './recurrence';
 
 /**
  * Represents a single TODO item found in a markdown file
@@ -20,6 +21,10 @@ export interface TodoItem {
 	dueDate?: Date;
 	/** Whether the task has a date */
 	hasDate: boolean;
+	/** Recurrence rule (if present) */
+	recurrence?: RecurrenceRule;
+	/** Whether the task has a recurrence pattern */
+	hasRecurrence: boolean;
 }
 
 /**
@@ -56,7 +61,11 @@ export enum TodoTreeItemType {
  */
 export const TODO_PATTERNS = {
 	task: /^\s*[-*+]\s+\[\s\]\s+(.*)$/,
-	date: /📅\s*(\d{4}-\d{2}-\d{2})/
+	completedTask: /^\s*[-*+]\s+\[x\]\s+(.*)$/i,
+	date: /📅\s*(\d{4}-\d{2}-\d{2})/,
+	// Recurrence pattern: 🔁 followed by text until end of line
+	// Using \uFE0F? to handle optional variation selector
+	recurrence: /🔁\uFE0F?\s*([a-zA-Z0-9, !]+)$/
 };
 
 /**

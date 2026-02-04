@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { TodoItem, TODO_PATTERNS } from './todoTypes';
+import { parseRecurrence } from './recurrence';
 
 /**
  * Scanner for finding TODO items in markdown files
@@ -215,6 +216,23 @@ export class TodoScanner {
 			displayText = content.replace(/📅\s*\d{4}-\d{2}-\d{2}/, '').trim();
 		}
 
+		// Extract recurrence if present
+		const recurrenceMatch = TODO_PATTERNS.recurrence.exec(content);
+		let hasRecurrence = false;
+		let recurrence = undefined;
+
+		if (recurrenceMatch) {
+			const recurrenceText = recurrenceMatch[1];
+			const parsedRecurrence = parseRecurrence(recurrenceText);
+			if (parsedRecurrence) {
+				recurrence = parsedRecurrence;
+				hasRecurrence = true;
+				
+				// Remove recurrence from display text
+				displayText = displayText.replace(TODO_PATTERNS.recurrence, '').trim();
+			}
+		}
+
 		return {
 			filePath,
 			uri: vscode.Uri.file(filePath),
@@ -223,7 +241,9 @@ export class TodoScanner {
 			taskText: taskText.trim(),
 			displayText,
 			dueDate,
-			hasDate
+			hasDate,
+			recurrence,
+			hasRecurrence
 		};
 	}
 

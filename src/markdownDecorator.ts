@@ -150,6 +150,17 @@ export class MarkdownDecorator {
 		this.decorationTypes.set('hr', vscode.window.createTextEditorDecorationType({
 			opacity: '0.3',
 		}));
+
+		// Task metadata emojis (date, recurrence, priority)
+		this.decorationTypes.set('task-emoji', vscode.window.createTextEditorDecorationType({
+			opacity: '0.8',
+		}));
+		
+		// Recurrence pattern text
+		this.decorationTypes.set('recurrence-text', vscode.window.createTextEditorDecorationType({
+			opacity: '0.6',
+			fontStyle: 'italic',
+		}));
 	}
 
 	public updateDecorations(editor: vscode.TextEditor) {
@@ -257,6 +268,30 @@ export class MarkdownDecorator {
 					);
 					decorations.get('blockquote-content')?.push({ range: contentRange });
 				}
+			}
+
+			// Task markers: - [ ] or - [x]
+			const taskMatch = line.match(/^(\s*)([-*+])\s+\[([ xX])\]\s+/);
+			if (taskMatch) {
+				const markerStart = taskMatch[1].length;
+				const markerEnd = taskMatch[0].length;
+				
+				const markerRange = new vscode.Range(
+					new vscode.Position(lineStart.line, markerStart),
+					new vscode.Position(lineStart.line, markerEnd)
+				);
+				decorations.get('list-marker')?.push({ range: markerRange });
+
+				if (taskMatch[3].toLowerCase() === 'x') {
+					const contentRange = new vscode.Range(
+						new vscode.Position(lineStart.line, markerEnd),
+						new vscode.Position(lineStart.line, line.length)
+					);
+					decorations.get('strikethrough-content')?.push({ range: contentRange });
+				}
+				
+				this.parseInlineFormatting(lineStart, line, decorations);
+				continue;
 			}
 
 			// List markers
@@ -513,6 +548,43 @@ export class MarkdownDecorator {
 				range: new vscode.Range(
 					new vscode.Position(lineStart.line, contentEnd),
 					new vscode.Position(lineStart.line, fullEnd)
+				)
+			});
+		}
+
+		// Task metadata: Date emoji (📅) and recurrence emoji (🔁)
+		const dateEmojiRegex = /📅/g;
+		while ((match = dateEmojiRegex.exec(line)) !== null) {
+			const emojiPos = match.index;
+			decorations.get('task-emoji')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, emojiPos),
+					new vscode.Position(lineStart.line, emojiPos + 1)
+				)
+			});
+		}
+
+		// Recurrence pattern: 🔁 followed by text until end of line
+		const recurrenceRegex = /🔁\uFE0F?\s*([a-zA-Z0-9, !]+)$/;
+		const recurrenceMatch = recurrenceRegex.exec(line);
+		if (recurrenceMatch) {
+			const emojiPos = recurrenceMatch.index;
+			const patternStart = emojiPos + (recurrenceMatch[0].length - recurrenceMatch[1].length);
+			const patternEnd = emojiPos + recurrenceMatch[0].length;
+
+			// Style the emoji
+			decorations.get('task-emoji')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, emojiPos),
+					new vscode.Position(lineStart.line, patternStart)
+				)
+			});
+
+			// Style the recurrence pattern text
+			decorations.get('recurrence-text')?.push({
+				range: new vscode.Range(
+					new vscode.Position(lineStart.line, patternStart),
+					new vscode.Position(lineStart.line, patternEnd)
 				)
 			});
 		}

@@ -47,7 +47,10 @@ class TodoTreeItem extends vscode.TreeItem {
 		tooltip.appendMarkdown(`📁 ${todo.filePath}\n\n`);
 		tooltip.appendMarkdown(`📍 Line ${todo.lineNumber}\n\n`);
 		if (todo.hasDate && todo.dueDate) {
-			tooltip.appendMarkdown(`📅 Due: ${formatDate(todo.dueDate)}`);
+			tooltip.appendMarkdown(`📅 Due: ${formatDate(todo.dueDate)}\n\n`);
+		}
+		if (todo.hasRecurrence && todo.recurrence) {
+			tooltip.appendMarkdown(`🔁 Recurrence: ${todo.recurrence.recurrenceText}`);
 		}
 		return tooltip;
 	}
@@ -188,8 +191,14 @@ export class TodoPanelProvider implements vscode.TreeDataProvider<TodoTreeItem> 
 		const todos = grouped.get(section) || [];
 
 		return todos.map(todo => {
+			// Build label with recurrence indicator
+			let label = todo.displayText;
+			if (todo.hasRecurrence) {
+				label = `${label} 🔁`;
+			}
+
 			return new TodoTreeItem(
-				todo.displayText,
+				label,
 				vscode.TreeItemCollapsibleState.None,
 				TodoTreeItemType.Todo,
 				undefined,

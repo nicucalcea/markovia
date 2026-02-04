@@ -98,6 +98,10 @@
         "title": "Markovia: Handle Enter Key"
       },
       {
+        "command": "markovia.toggleTaskCompletion",
+        "title": "Markovia: Toggle Task Completion"
+      },
+      {
         "command": "markovia.refreshTodoPanel",
         "title": "Markovia: Refresh TODO Panel",
         "icon": "$(refresh)"
@@ -239,6 +243,12 @@
         "key": "enter",
         "mac": "enter",
         "when": "editorTextFocus && editorLangId == markdown && !suggestWidgetVisible && !editorHasMultipleSelections"
+      },
+      {
+        "command": "markovia.toggleTaskCompletion",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && editorLangId == markdown"
       }
     ],
     "configuration": {
@@ -298,6 +308,7 @@
     "typescript-eslint": "^8.52.0"
   },
   "dependencies": {
-    "node-notifier": "^10.0.1"
+    "node-notifier": "^10.0.1",
+    "rrule": "^2.8.1"
   }
 }

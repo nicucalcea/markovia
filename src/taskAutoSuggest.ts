@@ -37,6 +37,13 @@ export class TaskAutoSuggestProvider implements vscode.CompletionItemProvider {
 			completions.push(...priorityCompletions);
 		}
 
+		// Only add recurrence emoji suggestion if recurrence hasn't been added yet
+		const hasRecurrence = lineText.includes('🔁');
+		if (!hasRecurrence) {
+			const recurrenceCompletion = this.createRecurrenceCompletion();
+			completions.push(recurrenceCompletion);
+		}
+
 		return completions;
 	}
 
@@ -81,6 +88,34 @@ export class TaskAutoSuggestProvider implements vscode.CompletionItemProvider {
 			return completion;
 		});
 	}
+
+	/**
+	 * Creates the recurrence emoji completion item
+	 */
+	private createRecurrenceCompletion(): vscode.CompletionItem {
+		const completion = new vscode.CompletionItem('🔁 Recurrence', vscode.CompletionItemKind.Event);
+		completion.detail = 'Add a recurrence pattern to this task';
+		completion.documentation = new vscode.MarkdownString(
+			'Insert a recurrence emoji and select from common recurrence patterns\n\n' +
+			'Examples:\n' +
+			'- `🔁 every day`\n' +
+			'- `🔁 every week`\n' +
+			'- `🔁 every Monday`\n' +
+			'- `🔁 every 2 weeks`\n' +
+			'- `🔁 every month`\n' +
+			'- `🔁 every month on the 15th`'
+		);
+		completion.insertText = '🔁 ';
+		completion.sortText = '5'; // After priorities
+		
+		// Add command to show recurrence picker after insertion
+		completion.command = {
+			command: 'markovia.showRecurrencePicker',
+			title: 'Show Recurrence Picker'
+		};
+
+		return completion;
+	}
 }
 
 /**
@@ -103,6 +138,119 @@ export async function showDatePicker() {
 			editBuilder.insert(position, selected.date);
 		});
 	}
+}
+
+/**
+ * Shows a quick pick menu with common recurrence patterns
+ */
+export async function showRecurrencePicker() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return;
+	}
+
+	const recurrenceOptions = getRecurrenceOptions();
+	const selected = await vscode.window.showQuickPick(recurrenceOptions, {
+		placeHolder: 'Select a recurrence pattern'
+	});
+
+	if (selected) {
+		const position = editor.selection.active;
+		editor.edit(editBuilder => {
+			editBuilder.insert(position, selected.pattern);
+		});
+	}
+}
+
+/**
+ * Generates common recurrence pattern options similar to Obsidian Tasks
+ */
+function getRecurrenceOptions(): Array<{ label: string; description: string; pattern: string }> {
+	const today = new Date();
+	const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+
+	return [
+		{
+			label: 'Every day',
+			description: 'Repeats daily',
+			pattern: 'every day'
+		},
+		{
+			label: 'Every week',
+			description: 'Repeats weekly',
+			pattern: 'every week'
+		},
+		{
+			label: 'Every 2 weeks',
+			description: 'Repeats bi-weekly',
+			pattern: 'every 2 weeks'
+		},
+		{
+			label: 'Every month',
+			description: 'Repeats monthly',
+			pattern: 'every month'
+		},
+		{
+			label: 'Every year',
+			description: 'Repeats yearly',
+			pattern: 'every year'
+		},
+		{
+			label: 'Every Monday',
+			description: 'Repeats every Monday',
+			pattern: 'every Monday'
+		},
+		{
+			label: 'Every Tuesday',
+			description: 'Repeats every Tuesday',
+			pattern: 'every Tuesday'
+		},
+		{
+			label: 'Every Wednesday',
+			description: 'Repeats every Wednesday',
+			pattern: 'every Wednesday'
+		},
+		{
+			label: 'Every Thursday',
+			description: 'Repeats every Thursday',
+			pattern: 'every Thursday'
+		},
+		{
+			label: 'Every Friday',
+			description: 'Repeats every Friday',
+			pattern: 'every Friday'
+		},
+		{
+			label: 'Every Saturday',
+			description: 'Repeats every Saturday',
+			pattern: 'every Saturday'
+		},
+		{
+			label: 'Every Sunday',
+			description: 'Repeats every Sunday',
+			pattern: 'every Sunday'
+		},
+		{
+			label: 'Every Monday, Wednesday, Friday',
+			description: 'Repeats on multiple days',
+			pattern: 'every Monday, Wednesday, Friday'
+		},
+		{
+			label: 'Every day when done',
+			description: 'Next occurrence from completion date',
+			pattern: 'every day when done'
+		},
+		{
+			label: 'Every week when done',
+			description: 'Next occurrence from completion date',
+			pattern: 'every week when done'
+		},
+		{
+			label: `Every ${dayName} when done`,
+			description: 'Next occurrence from completion date',
+			pattern: `every ${dayName} when done`
+		}
+	];
 }
 
 /**

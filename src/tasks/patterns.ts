@@ -22,9 +22,10 @@ export const METADATA_PATTERNS = {
 	/** 
 	 * Matches recurrence emoji with pattern: 🔁 every day
 	 * Using \uFE0F? to handle optional variation selector
-	 * Use a lookahead to not consume the trailing space or end
+	 * Captures text until another metadata emoji or end of line
+	 * Supports recurrence appearing anywhere in the line
 	 */
-	recurrence: /🔁\uFE0F?\s*([a-zA-Z0-9, !]+?)(?=\s|$)/,
+	recurrence: /🔁\uFE0F?\s*(.+?)(?=\s*[📅🏷️⏫⏬🔼🔽]|\s*$)/,
 } as const;
 
 /**

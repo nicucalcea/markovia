@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { isMarkdownLikeDocument } from '../documentUtils';
 import { TodoScanner } from '../tasks/scanner';
 import { DateSection } from '../tasks/types';
 
@@ -92,6 +93,22 @@ suite('TODO Panel Test Suite', () => {
 		assert.strictEqual(todos[0].displayText, 'Dash task');
 		assert.strictEqual(todos[1].displayText, 'Star task');
 		assert.strictEqual(todos[2].displayText, 'Plus task');
+	});
+
+	test('Markdown-like document detection should include svx files', () => {
+		const mdDoc = {
+			uri: vscode.Uri.file('/test/file.md'),
+			fileName: '/test/file.md',
+			languageId: 'markdown'
+		} as vscode.TextDocument;
+		const svxDoc = {
+			uri: vscode.Uri.file('/test/file.svx'),
+			fileName: '/test/file.svx',
+			languageId: 'plaintext'
+		} as vscode.TextDocument;
+
+		assert.strictEqual(isMarkdownLikeDocument(mdDoc), true);
+		assert.strictEqual(isMarkdownLikeDocument(svxDoc), true);
 	});
 
 	test('Date parsing should handle valid dates', () => {

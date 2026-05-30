@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isMarkdownLikeEditor } from './documentUtils';
 import { METADATA_PATTERNS } from './tasks/patterns';
 
 export class MarkdownDecorator {
@@ -165,7 +166,7 @@ export class MarkdownDecorator {
 	}
 
 	public updateDecorations(editor: vscode.TextEditor) {
-		if (editor.document.languageId !== 'markdown') {
+		if (!isMarkdownLikeEditor(editor)) {
 			return;
 		}
 

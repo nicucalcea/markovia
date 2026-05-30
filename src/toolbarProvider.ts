@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isMarkdownLikeDocument } from './documentUtils';
 
 export class MarkdownToolbarProvider implements vscode.CodeLensProvider {
 	private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -7,7 +8,7 @@ export class MarkdownToolbarProvider implements vscode.CodeLensProvider {
 	constructor() {}
 
 	public provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-		if (document.languageId !== 'markdown') {
+		if (!isMarkdownLikeDocument(document)) {
 			return [];
 		}
 

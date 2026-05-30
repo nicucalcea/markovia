@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isMarkdownLikeDocument } from '../documentUtils';
 import { isUncompletedTask, isCompletedTask } from './completion';
 
 /**
@@ -13,7 +14,7 @@ export class TaskCodeLensProvider implements vscode.CodeLensProvider {
 	constructor() {}
 
 	public provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-		if (document.languageId !== 'markdown') {
+		if (!isMarkdownLikeDocument(document)) {
 			return [];
 		}
 

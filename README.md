@@ -86,19 +86,6 @@ No external dependencies required. Works with VS Code 1.108.1 and above.
 - Font size scaling for headings is limited by VS Code's decoration API (using letter-spacing and bold weight for differentiation)
 - Very long documents may experience slight rendering delays
 
-## Release Notes
-
-### 0.0.1
-
-Initial release:
-- WYSIWYG-style rendering with visible but deemphasized Markdown syntax
-- All CommonMark formatting commands
-- Keyboard shortcuts for quick formatting
-- Status bar toolbar for easy access
-- Toggle-based formatting operations
-- Support for links, images, and code blocks
-- Real-time decoration updates as you type
-
 ---
 
 ## Installation

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { TodoItem, DateSection, TodoTreeItemType, getDateSectionInfo, getStartOfDay, formatDate } from './types';
 import { TodoScanner } from './scanner';
+import { isMarkdownLikeDocument } from '../documentUtils';
 
 /**
  * Tree item for the TODO panel
@@ -101,7 +102,7 @@ export class TodoPanelProvider implements vscode.TreeDataProvider<TodoTreeItem> 
 	 * Update a specific file
 	 */
 	updateFile(document: vscode.TextDocument): void {
-		if (document.languageId !== 'markdown') {
+		if (!isMarkdownLikeDocument(document)) {
 			return;
 		}
 

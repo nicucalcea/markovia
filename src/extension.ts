@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isMarkdownLikeDocument, isMarkdownLikeEditor } from './documentUtils';
 import { MarkdownDecorator } from './markdownDecorator';
 import { MarkdownToolbarProvider } from './toolbarProvider';
 import { MarkdownPasteHandler } from './pasteHandler';
@@ -31,7 +32,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	toolbarProvider = new MarkdownToolbarProvider();
 	context.subscriptions.push(
 		vscode.languages.registerCodeLensProvider(
-			{ language: 'markdown', scheme: 'file' },
+			[
+				{ language: 'markdown', scheme: 'file' },
+				{ scheme: 'file', pattern: '**/*.svx' }
+			],
 			toolbarProvider
 		)
 	);
@@ -40,7 +44,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	taskCodeLensProvider = new TaskCodeLensProvider();
 	context.subscriptions.push(
 		vscode.languages.registerCodeLensProvider(
-			{ language: 'markdown', scheme: 'file' },
+			[
+				{ language: 'markdown', scheme: 'file' },
+				{ scheme: 'file', pattern: '**/*.svx' }
+			],
 			taskCodeLensProvider
 		)
 	);
@@ -49,7 +56,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const taskAutoSuggestProvider = new TaskAutoSuggestProvider();
 	context.subscriptions.push(
 		vscode.languages.registerCompletionItemProvider(
-			{ language: 'markdown', scheme: 'file' },
+			[
+				{ language: 'markdown', scheme: 'file' },
+				{ scheme: 'file', pattern: '**/*.svx' }
+			],
 			taskAutoSuggestProvider,
 			' ' // Trigger on space after checkbox
 		)
@@ -59,7 +69,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const pasteHandler = new MarkdownPasteHandler();
 	context.subscriptions.push(
 		vscode.languages.registerDocumentPasteEditProvider(
-			{ language: 'markdown', scheme: 'file' },
+			[
+				{ language: 'markdown', scheme: 'file' },
+				{ scheme: 'file', pattern: '**/*.svx' }
+			],
 			pasteHandler,
 			{ 
 				pasteMimeTypes: ['text/html'],
@@ -99,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		// Watch for file changes
 		context.subscriptions.push(
 			vscode.workspace.onDidSaveTextDocument(document => {
-				if (document.languageId === 'markdown') {
+				if (isMarkdownLikeDocument(document)) {
 					todoPanelProvider.updateFile(document);
 				}
 			}),
@@ -176,7 +189,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				updateWordCount(editor);
 				
 				// Refresh task CodeLens when document changes
-				if (event.document.languageId === 'markdown') {
+				if (isMarkdownLikeDocument(event.document)) {
 					taskCodeLensProvider.refresh();
 				}
 			}
@@ -206,7 +219,7 @@ function updateDecorations(editor: vscode.TextEditor) {
 	const config = vscode.workspace.getConfiguration('markovia');
 	const enableWYSIWYG = config.get<boolean>('enableWYSIWYG', true);
 	
-	if (enableWYSIWYG) {
+	if (enableWYSIWYG && isMarkdownLikeEditor(editor)) {
 		decorator.updateDecorations(editor);
 	}
 }
@@ -217,8 +230,8 @@ function updateWordCount(editor: vscode.TextEditor | undefined) {
 		return;
 	}
 
-	// Only show for markdown files
-	if (editor.document.languageId !== 'markdown') {
+	// Only show for markdown-like files
+	if (!isMarkdownLikeEditor(editor)) {
 		statusBarItem.hide();
 		return;
 	}
@@ -537,7 +550,7 @@ function toggleComment() {
 
 async function handleEnterKey() {
 	const editor = vscode.window.activeTextEditor;
-	if (!editor || editor.document.languageId !== 'markdown') {
+	if (!isMarkdownLikeEditor(editor)) {
 		// Fall back to default enter behavior
 		await vscode.commands.executeCommand('type', { text: '\n' });
 		return;
@@ -546,6 +559,26 @@ async function handleEnterKey() {
 	const position = editor.selection.active;
 	const line = editor.document.lineAt(position.line);
 	const lineText = line.text;
+
+	// Check for task list items first so they don't fall through to plain bullets
+	const taskMatch = lineText.match(/^(\s*)([-*+])\s+\[[ xX]\]\s+(.*)$/);
+	if (taskMatch) {
+		const [, indent, marker, content] = taskMatch;
+
+		// If content is empty, remove the task item and exit the list
+		if (!content.trim()) {
+			await editor.edit(editBuilder => {
+				editBuilder.delete(line.range);
+			});
+			return;
+		}
+
+		// Continue the task list with a new unchecked item
+		await editor.edit(editBuilder => {
+			editBuilder.insert(position, `\n${indent}${marker} [ ] `);
+		});
+		return;
+	}
 
 	// Check for bullet list
 	const bulletMatch = lineText.match(/^(\s*)([-*+])\s+(.*)$/);
@@ -597,7 +630,7 @@ async function handleEnterKey() {
  */
 async function handleToggleTaskCompletion() {
 	const editor = vscode.window.activeTextEditor;
-	if (!editor || editor.document.languageId !== 'markdown') {
+	if (!isMarkdownLikeEditor(editor)) {
 		return;
 	}
 
@@ -612,7 +645,7 @@ async function handleToggleTaskCompletion() {
  */
 async function handleCompleteTaskAtLine(lineNumber: number) {
 	const editor = vscode.window.activeTextEditor;
-	if (!editor || editor.document.languageId !== 'markdown') {
+	if (!isMarkdownLikeEditor(editor)) {
 		return;
 	}
 

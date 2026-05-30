@@ -2,7 +2,7 @@
   "name": "markovia",
   "displayName": "Markovia",
   "description": "Simple and lightweight Markdown editor for VS Code with formatting toolbar and keyboard shortcuts.",
-  "version": "0.0.3",
+  "version": "0.1.1",
   "publisher": "nicu-calcea",
   "engines": {
     "vscode": "^1.108.1"
@@ -12,10 +12,22 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onLanguage:svx"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "svx",
+        "aliases": [
+          "SVX"
+        ],
+        "extensions": [
+          ".svx"
+        ]
+      }
+    ],
     "commands": [
       {
         "command": "markovia.toggleBold",
@@ -134,121 +146,121 @@
         "command": "markovia.toggleBold",
         "key": "ctrl+b",
         "mac": "cmd+b",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleItalic",
         "key": "ctrl+i",
         "mac": "cmd+i",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleStrikethrough",
         "key": "ctrl+shift+x",
         "mac": "cmd+shift+x",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleCode",
         "key": "ctrl+`",
         "mac": "cmd+`",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleUnderline",
         "key": "ctrl+u",
         "mac": "cmd+u",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.insertLink",
         "key": "ctrl+k",
         "mac": "cmd+k",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.insertImage",
         "key": "ctrl+shift+i",
         "mac": "cmd+shift+i",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.insertCodeBlock",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading1",
         "key": "ctrl+shift+1",
         "mac": "cmd+shift+1",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading2",
         "key": "ctrl+shift+2",
         "mac": "cmd+shift+2",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading3",
         "key": "ctrl+shift+3",
         "mac": "cmd+shift+3",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading4",
         "key": "ctrl+shift+4",
         "mac": "cmd+shift+4",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading5",
         "key": "ctrl+shift+5",
         "mac": "cmd+shift+5",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleHeading6",
         "key": "ctrl+shift+6",
         "mac": "cmd+shift+6",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleBulletList",
         "key": "ctrl+shift+8",
         "mac": "cmd+shift+8",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleNumberedList",
         "key": "ctrl+shift+7",
         "mac": "cmd+shift+7",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.toggleBlockquote",
         "key": "ctrl+shift+9",
         "mac": "cmd+shift+9",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.insertHorizontalRule",
         "key": "ctrl+shift+h",
         "mac": "cmd+shift+h",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       },
       {
         "command": "markovia.onEnterKey",
         "key": "enter",
         "mac": "enter",
-        "when": "editorTextFocus && editorLangId == markdown && !suggestWidgetVisible && !editorHasMultipleSelections"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx) && !suggestWidgetVisible && !editorHasMultipleSelections"
       },
       {
         "command": "markovia.toggleTaskCompletion",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .svx)"
       }
     ],
     "configuration": {

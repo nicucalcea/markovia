@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isMarkdownLikeDocument } from './documentUtils';
 
 /**
  * Handles paste events to preserve Markdown-compatible formatting
@@ -12,8 +13,8 @@ export class MarkdownPasteHandler implements vscode.DocumentPasteEditProvider {
 		context: vscode.DocumentPasteEditContext,
 		token: vscode.CancellationToken
 	): Promise<vscode.DocumentPasteEdit[] | undefined> {
-		// Only handle Markdown files
-		if (document.languageId !== 'markdown') {
+		// Only handle Markdown-like files
+		if (!isMarkdownLikeDocument(document)) {
 			return undefined;
 		}
 

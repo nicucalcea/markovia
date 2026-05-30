@@ -6,7 +6,7 @@ import { TodoItem, TODO_PATTERNS, METADATA_PATTERNS } from './types';
 import { parseRecurrence } from './recurrence';
 
 /**
- * Scanner for finding TODO items in markdown files
+ * Scanner for finding TODO items in markdown-like files
  * Uses ripgrep for workspace scanning and in-memory regex for open files
  */
 export class TodoScanner {
@@ -79,6 +79,7 @@ export class TodoScanner {
 				'--color', 'never',
 				'-e', pattern,
 				'-g', '*.md',
+				'-g', '*.svx',
 				'-g', '!node_modules',
 				'-g', '!.git',
 				'.'
@@ -139,7 +140,11 @@ export class TodoScanner {
 	 * Fallback: Scan workspace using VS Code's built-in findFiles
 	 */
 	private async scanWorkspaceWithVSCode(): Promise<TodoItem[]> {
-		const files = await vscode.workspace.findFiles('**/*.md', '{**/node_modules/**,**/.git/**}');
+		const [markdownFiles, svxFiles] = await Promise.all([
+			vscode.workspace.findFiles('**/*.md', '{**/node_modules/**,**/.git/**}'),
+			vscode.workspace.findFiles('**/*.svx', '{**/node_modules/**,**/.git/**}')
+		]);
+		const files = [...markdownFiles, ...svxFiles];
 		const todos: TodoItem[] = [];
 
 		for (const fileUri of files) {
